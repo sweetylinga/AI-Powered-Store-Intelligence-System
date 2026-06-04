@@ -1,4 +1,6 @@
 # AI-Powered Store Intelligence System
+✅ Live Frontend Deployment
+https://ai-powered-store-intelligence-syste-tau.vercel.app
 
 ## Overview
 
