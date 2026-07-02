@@ -1,7 +1,6 @@
 # AI-Powered Store Intelligence System
 ✅ Live Frontend Deployment
-https://ai-powered-store-intelligence-syste-tau.vercel.app
-
+https://ai-powered-store-intelligence-system-3.onrender.com/
 ## Overview
 
 AI-Powered Store Intelligence System is a retail analytics platform that processes CCTV footage and generates real-time operational insights. The system detects customer movement, queue formation, zone activity, and store performance metrics while exposing analytics through REST APIs and a React dashboard.
