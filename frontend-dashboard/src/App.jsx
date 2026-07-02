@@ -29,23 +29,23 @@ const [liveTracking, setLiveTracking] = useState(null);
   const fetchData = async () => {
     try {
       const metricsRes = await fetch(
-        "http://127.0.0.1:8000/stores/store_1076/metrics"
+        "https://ai-powered-store-intelligence-system-2.onrender.com"
       );
 
       const funnelRes = await fetch(
-        "http://127.0.0.1:8000/stores/store_1076/funnel"
+        "https://ai-powered-store-intelligence-system-2.onrender.com"
       );
 
       const heatmapRes = await fetch(
-        "http://127.0.0.1:8000/stores/store_1076/heatmap"
+        "https://ai-powered-store-intelligence-system-2.onrender.com"
       );
 
       const anomaliesRes = await fetch(
-        "http://127.0.0.1:8000/stores/store_1076/anomalies"
+        "https://ai-powered-store-intelligence-system-2.onrender.com"
       );
 
       const liveRes = await fetch(
-  "http://127.0.0.1:8000/live-tracking"
+  "https://ai-powered-store-intelligence-system-2.onrender.com"
 );
 
       const metricsData = await metricsRes.json();
