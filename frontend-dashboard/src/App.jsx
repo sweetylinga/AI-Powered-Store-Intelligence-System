@@ -17,15 +17,28 @@ const [lastUpdated, setLastUpdated] = useState("");
 const [liveTracking, setLiveTracking] = useState(null);
 
   useEffect(() => {
-    fetchData();
+  fetchData();
 
+  const interval = setInterval(() => {
+    fetchData();
+  }, 2000);
+
+<<<<<<< HEAD
     const interval = setInterval(() => {
       fetchData();
  }, 2000); 
+=======
+  return () => clearInterval(interval);
+}, []);
+>>>>>>> 58db292 (Fix frontend API calls)
 
-    return () => clearInterval(interval);
-  }, []);
+const fetchData = async () => {
+  try {
+    const metricsRes = await fetch(
+      "https://ai-powered-store-intelligence-system-2.onrender.com/stores/1/metrics"
+    );
 
+<<<<<<< HEAD
   const metricsRes = await fetch(
   "https://ai-powered-store-intelligence-system-2.onrender.com/stores/1/metrics"
 );
@@ -45,26 +58,42 @@ const anomaliesRes = await fetch(
 const liveRes = await fetch(
   "https://ai-powered-store-intelligence-system-2.onrender.com/live-tracking"
 );
+=======
+    const funnelRes = await fetch(
+      "https://ai-powered-store-intelligence-system-2.onrender.com/stores/1/funnel"
+    );
 
-      const metricsData = await metricsRes.json();
-      const funnelData = await funnelRes.json();
-      const heatmapData = await heatmapRes.json();
-      const anomaliesData = await anomaliesRes.json();
-      const liveData = await liveRes.json();
+    const heatmapRes = await fetch(
+      "https://ai-powered-store-intelligence-system-2.onrender.com/stores/1/heatmap"
+    );
 
-      setMetrics(metricsData);
-      setFunnel(funnelData.funnel);
-  setHeatmap(heatmapData);
-      setAnomalies(anomaliesData.anomalies);
+    const anomaliesRes = await fetch(
+      "https://ai-powered-store-intelligence-system-2.onrender.com/stores/1/anomalies"
+    );
 
-      setLiveTracking(liveData);
-setEvents(liveData.events || []);
+    const liveRes = await fetch(
+      "https://ai-powered-store-intelligence-system-2.onrender.com/live-tracking"
+    );
 
-      setLastUpdated(new Date().toLocaleTimeString());
-    } catch (err) {
-      console.log(err);
-    }
-  };
+    const metricsData = await metricsRes.json();
+    const funnelData = await funnelRes.json();
+    const heatmapData = await heatmapRes.json();
+    const anomaliesData = await anomaliesRes.json();
+    const liveData = await liveRes.json();
+>>>>>>> 58db292 (Fix frontend API calls)
+
+    setMetrics(metricsData);
+    setFunnel(funnelData.funnel);
+    setHeatmap(heatmapData);
+    setAnomalies(anomaliesData.anomalies);
+    setLiveTracking(liveData);
+    setEvents(liveData.events || []);
+    setLastUpdated(new Date().toLocaleTimeString());
+
+  } catch (err) {
+    console.log(err);
+  }
+};
 
  if (!metrics || !funnel || !liveTracking) {
   return <h1>Loading...</h1>;
