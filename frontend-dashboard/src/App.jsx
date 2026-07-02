@@ -23,14 +23,8 @@ const [liveTracking, setLiveTracking] = useState(null);
     fetchData();
   }, 2000);
 
-<<<<<<< HEAD
-    const interval = setInterval(() => {
-      fetchData();
- }, 2000); 
-=======
   return () => clearInterval(interval);
 }, []);
->>>>>>> 58db292 (Fix frontend API calls)
 
 const fetchData = async () => {
   try {
@@ -38,27 +32,6 @@ const fetchData = async () => {
       "https://ai-powered-store-intelligence-system-2.onrender.com/stores/1/metrics"
     );
 
-<<<<<<< HEAD
-  const metricsRes = await fetch(
-  "https://ai-powered-store-intelligence-system-2.onrender.com/stores/1/metrics"
-);
-
-const funnelRes = await fetch(
-  "https://ai-powered-store-intelligence-system-2.onrender.com/stores/1/funnel"
-);
-
-const heatmapRes = await fetch(
-  "https://ai-powered-store-intelligence-system-2.onrender.com/stores/1/heatmap"
-);
-
-const anomaliesRes = await fetch(
-  "https://ai-powered-store-intelligence-system-2.onrender.com/stores/1/anomalies"
-);
-
-const liveRes = await fetch(
-  "https://ai-powered-store-intelligence-system-2.onrender.com/live-tracking"
-);
-=======
     const funnelRes = await fetch(
       "https://ai-powered-store-intelligence-system-2.onrender.com/stores/1/funnel"
     );
@@ -80,7 +53,6 @@ const liveRes = await fetch(
     const heatmapData = await heatmapRes.json();
     const anomaliesData = await anomaliesRes.json();
     const liveData = await liveRes.json();
->>>>>>> 58db292 (Fix frontend API calls)
 
     setMetrics(metricsData);
     setFunnel(funnelData.funnel);
