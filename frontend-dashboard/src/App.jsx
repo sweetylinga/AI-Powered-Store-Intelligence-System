@@ -21,7 +21,7 @@ const [liveTracking, setLiveTracking] = useState(null);
 
     const interval = setInterval(() => {
       fetchData();
- }, 2000);
+ }, 2000); 
 
     return () => clearInterval(interval);
   }, []);
