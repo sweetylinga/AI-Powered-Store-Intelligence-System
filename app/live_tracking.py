@@ -17,7 +17,6 @@ video_paths = {
     "zone": "data/videos/zone.mp4.mp4"
 }
 
-# Open videos
 # Prevent parallel video access crashes
 video_lock = Lock()
 
@@ -26,9 +25,11 @@ caps = {
     key: cv2.VideoCapture(path)
     for key, path in video_paths.items()
 }
+
 print("ENTRY OPEN:", caps["entry"].isOpened())
 print("BILLING OPEN:", caps["billing"].isOpened())
 print("ZONE OPEN:", caps["zone"].isOpened())
+
 # Live dashboard state
 live_state = {
     "visitors": 0,
@@ -40,17 +41,19 @@ live_state = {
 
 
 def detect_people(frame):
-   results = model( frame, verbose=False, stream=False, device="cpu",workers=0)
-   person_count = 0
-   for result in results:
+    results = model(frame, verbose=False, stream=False, device="cpu", workers=0)
+
+    person_count = 0
+
+    for result in results:
         for box in result.boxes:
             cls = int(box.cls[0])
             conf = float(box.conf[0])
 
-            # person class = 0
             if cls == 0 and conf > 0.05:
                 person_count += 1
-        return person_count
+
+    return person_count
 
 
 def store_event(visitor_id, event_type, zone_name=None):
@@ -66,7 +69,7 @@ def store_event(visitor_id, event_type, zone_name=None):
         ]
 
         requests.post(
-            "http://127.0.0.1:8000/events/ingest",
+            "https://ai-powered-store-intelligence-system-2.onrender.com/events/ingest",
             json=payload,
             timeout=3
         )
@@ -76,96 +79,92 @@ def store_event(visitor_id, event_type, zone_name=None):
 
 
 def update_tracking():
-    entry_cap = caps["entry"]
-    billing_cap = caps["billing"]
-    zone_cap = caps["zone"]
+    with video_lock:
 
-    ret1, frame1 = entry_cap.read()
-    ret2, frame2 = billing_cap.read()
-    ret3, frame3 = zone_cap.read()
+        entry_cap = caps["entry"]
+        billing_cap = caps["billing"]
+        zone_cap = caps["zone"]
 
-    # DEBUG
-    print("ENTRY FRAME:", ret1)
-    print("BILLING FRAME:", ret2)
-    print("ZONE FRAME:", ret3)
-
-    # Restart videos automatically
-    if not ret1:
-        entry_cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
         ret1, frame1 = entry_cap.read()
-
-    if not ret2:
-        billing_cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
         ret2, frame2 = billing_cap.read()
-
-    if not ret3:
-        zone_cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
         ret3, frame3 = zone_cap.read()
 
-    # Detect people
-    visitors = detect_people(frame1)
-    queue_depth = detect_people(frame2)
-    zone_people = detect_people(frame3)
+        print("ENTRY FRAME:", ret1)
+        print("BILLING FRAME:", ret2)
+        print("ZONE FRAME:", ret3)
 
-    # DEBUG
-    print("Visitors:", visitors)
-    print("Queue:", queue_depth)
-    print("Zone:", zone_people)
+        if not ret1:
+            entry_cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+            ret1, frame1 = entry_cap.read()
 
-    # Update metrics
-    live_state["visitors"] = visitors
-    live_state["queue_depth"] = queue_depth
+        if not ret2:
+            billing_cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+            ret2, frame2 = billing_cap.read()
 
-    # Dwell time
-    if zone_people > 0:
-        live_state["dwell_time"] += 2
+        if not ret3:
+            zone_cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+            ret3, frame3 = zone_cap.read()
 
-    timestamp = time.strftime("%I:%M:%S %p")
+        if frame1 is None or frame2 is None or frame3 is None:
+            return live_state
 
-    events = []
+        visitors = detect_people(frame1)
+        queue_depth = detect_people(frame2)
+        zone_people = detect_people(frame3)
 
-    # ENTRY EVENTS
-    if visitors > 0:
-        events.append({
-            "time": timestamp,
-            "event": f"{visitors} visitor(s) detected at entrance",
-            "source": "entry_1.mp4"
-        })
+        print("Visitors:", visitors)
+        print("Queue:", queue_depth)
+        print("Zone:", zone_people)
 
-        store_event(
-            visitor_id=f"visitor_{visitors}",
-            event_type="ENTRY_DETECTED",
-            zone_name="Entrance"
-        )
+        live_state["visitors"] = visitors
+        live_state["queue_depth"] = queue_depth
 
-    # BILLING EVENTS
-    if queue_depth > 0:
-        events.append({
-            "time": timestamp,
-            "event": f"Queue depth detected: {queue_depth}",
-            "source": "billing_area.mp4"
-        })
+        if zone_people > 0:
+            live_state["dwell_time"] += 2
 
-        store_event(
-            visitor_id="queue_customer",
-            event_type="QUEUE_DETECTED",
-            zone_name="Billing"
-        )
+        timestamp = time.strftime("%I:%M:%S %p")
 
-    # ZONE EVENTS
-    if zone_people > 0:
-        events.append({
-            "time": timestamp,
-            "event": "Electronics zone activity detected",
-            "source": "zone.mp4"
-        })
+        events = []
 
-        store_event(
-            visitor_id="zone_customer",
-            event_type="ZONE_ACTIVITY",
-            zone_name="Electronics"
-        )
+        if visitors > 0:
+            events.append({
+                "time": timestamp,
+                "event": f"{visitors} visitor(s) detected at entrance",
+                "source": "entry_1.mp4"
+            })
 
-    live_state["events"] = events
+            store_event(
+                visitor_id=f"visitor_{visitors}",
+                event_type="ENTRY_DETECTED",
+                zone_name="Entrance"
+            )
 
-    return live_state
+        if queue_depth > 0:
+            events.append({
+                "time": timestamp,
+                "event": f"Queue depth detected: {queue_depth}",
+                "source": "billing_area.mp4"
+            })
+
+            store_event(
+                visitor_id="queue_customer",
+                event_type="QUEUE_DETECTED",
+                zone_name="Billing"
+            )
+
+        if zone_people > 0:
+            events.append({
+                "time": timestamp,
+                "event": "Electronics zone activity detected",
+                "source": "zone.mp4"
+            })
+
+            store_event(
+                visitor_id="zone_customer",
+                event_type="ZONE_ACTIVITY",
+                zone_name="Electronics"
+            )
+
+        live_state["events"] = events
+
+        return live_state
